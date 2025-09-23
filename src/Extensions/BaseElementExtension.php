@@ -89,13 +89,9 @@ class BaseElementExtension extends Extension
      * ----------------------------------------------------
      */
 
-    public function getTitle(): ?string
+    public function getHeadline(): ?string
     {
-        $curr = Controller::curr();
-//        return !is_null($curr) && is_a($curr, GraphQLController::class, false)
-        return !is_null($curr)
-            ? $this->getOwner()->getInlineCMSTitle()
-            : $this->getOwner()->getLocalTitle();
+        return $this->getOwner()->getLocalTitle();
     }
 
     public function getLocalTitle(): ?string
