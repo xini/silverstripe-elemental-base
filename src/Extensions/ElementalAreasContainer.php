@@ -78,7 +78,7 @@ class ElementalAreasContainer extends Extension
      * ----------------------------------------------------
      */
 
-    public function requireDefaultRecords(): void
+    public function onRequireDefaultRecords(): void
     {
         $fieldNames = $this->getOwner()->getElementalAreaFieldNames();
         if (empty($fieldNames)) {
