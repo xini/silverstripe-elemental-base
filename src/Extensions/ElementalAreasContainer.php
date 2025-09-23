@@ -2,6 +2,7 @@
 
 namespace Fromholdio\Elemental\Base\Extensions;
 
+use Ci\App\Elemental\Model\SiteBelowElementsConfig;
 use DNADesign\Elemental\Models\BaseElement;
 use Fromholdio\CMSFieldsPlacement\CMSFieldsPlacement;
 use LeKoala\CmsActions\CustomAction;
@@ -16,6 +17,8 @@ use Fromholdio\Elemental\Base\Model\EvoElementalArea;
 
 class ElementalAreasContainer extends Extension
 {
+    private static $do_add_publish_with_blocks_action = true;
+
     private static $has_many = [
         'ContainedAreas' => EvoElementalArea::class . '.ParentContainer'
     ];
@@ -42,6 +45,10 @@ class ElementalAreasContainer extends Extension
 
     public function updateCMSActions(FieldList $actions)
     {
+        if (!$this->getOwner()->config()->get('do_add_publish_with_blocks_action')) {
+            return;
+        }
+
         $action = CustomAction::create('doPublishWithAreas', 'Publish (including all blocks)')
             ->setShouldRefresh(true)
             ->addExtraClass('btn-outline-primary')

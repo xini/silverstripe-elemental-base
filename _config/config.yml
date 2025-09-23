@@ -38,6 +38,7 @@ Page:
     fioElementalBaseAreasContainer: Fromholdio\Elemental\Base\Extensions\ElementalAreasContainer
 
 SilverStripe\SiteConfig\SiteConfig:
+  do_add_publish_with_blocks_action: false
   extensions:
     fioElementalBaseAreasContainer: Fromholdio\Elemental\Base\Extensions\ElementalAreasContainer
 
