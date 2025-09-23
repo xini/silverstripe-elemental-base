@@ -4,7 +4,6 @@ namespace Fromholdio\Elemental\Base\Controllers;
 
 use DNADesign\Elemental\Controllers\ElementController;
 use SilverStripe\Control\Controller;
-use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverStripe\View\SSViewer;
 
 class EvoElementController extends ElementController
@@ -14,11 +13,11 @@ class EvoElementController extends ElementController
      * ----------------------------------------------------
      */
 
-    public function forTemplate(): ?DBHTMLText
+    public function forTemplate(): string
     {
         $templates = $this->getElement()->getHolderTemplates();
         return empty($templates)
-            ? null
+            ? ''
             : $this->renderWith(SSViewer::create($templates));
     }
 

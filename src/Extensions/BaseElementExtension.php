@@ -12,22 +12,21 @@ use SilverStripe\Assets\Image;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Control\Controller;
 use SilverStripe\Core\ClassInfo;
+use SilverStripe\Core\Extension;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\FormField;
-use SilverStripe\Forms\HiddenField;
 use SilverStripe\Forms\HTMLEditor\HTMLEditorField;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\Tab;
 use SilverStripe\Forms\TabSet;
 use SilverStripe\Forms\TextField;
-use SilverStripe\ORM\ArrayList;
-use SilverStripe\ORM\DataExtension;
-use SilverStripe\GraphQL\Controller as GraphQLController;
+use SilverStripe\Model\List\ArrayList;
+#use SilverStripe\GraphQL\Controller as GraphQLController;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBField;
 use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverStripe\ORM\FieldType\DBHTMLVarchar;
-use SilverStripe\ORM\SS_List;
+use SilverStripe\Model\List\SS_List;
 use SilverStripe\Security\Permission;
 use SilverStripe\View\Parsers\URLSegmentFilter;
 use Fromholdio\Elemental\Base\EvoElementTrait;
@@ -37,7 +36,7 @@ use Fromholdio\Elemental\Base\Model\EvoElementalArea;
 /**
  * @mixin EvoElementTrait
  */
-class BaseElementExtension extends DataExtension
+class BaseElementExtension extends Extension
 {
     private static $controller_class = EvoElementController::class;
 
@@ -89,7 +88,8 @@ class BaseElementExtension extends DataExtension
     public function Title(): ?string
     {
         $curr = Controller::curr();
-        return !is_null($curr) && is_a($curr, GraphQLController::class, false)
+//        return !is_null($curr) && is_a($curr, GraphQLController::class, false)
+        return !is_null($curr)
             ? $this->getOwner()->getInlineCMSTitle()
             : $this->getOwner()->getLocalTitle();
     }
@@ -1150,8 +1150,8 @@ class BaseElementExtension extends DataExtension
     public function isAdminCurrController(): bool
     {
         $curr = Controller::curr();
-        return is_a($curr, LeftAndMain::class, false)
-            || is_a($curr, GraphQLController::class, false);
+        return is_a($curr, LeftAndMain::class, false);
+//            || is_a($curr, GraphQLController::class, false);
     }
 
     public function isBaseElement(): bool

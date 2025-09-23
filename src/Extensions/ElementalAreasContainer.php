@@ -7,14 +7,14 @@ use Fromholdio\CMSFieldsPlacement\CMSFieldsPlacement;
 use LeKoala\CmsActions\CustomAction;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Extension;
 use SilverStripe\Forms\FieldList;
-use SilverStripe\ORM\ArrayList;
-use SilverStripe\ORM\DataExtension;
+use SilverStripe\Model\List\ArrayList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Versioned;
 use Fromholdio\Elemental\Base\Model\EvoElementalArea;
 
-class ElementalAreasContainer extends DataExtension
+class ElementalAreasContainer extends Extension
 {
     private static $has_many = [
         'ContainedAreas' => EvoElementalArea::class . '.ParentContainer'
