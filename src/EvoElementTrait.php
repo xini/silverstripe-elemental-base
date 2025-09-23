@@ -63,7 +63,7 @@ trait EvoElementTrait
         return $link;
     }
 
-    public function CMSEditLink($directLink = false): ?string
+    public function getCMSEditLink($directLink = false): ?string
     {
         $link = $this->getCachedCMSEditLink();
         if (!is_null($link)) {
@@ -79,46 +79,51 @@ trait EvoElementTrait
         $container = $area->getLocalContainer(false);
         if (is_null($container)) return null;
 
-        if (!$container->hasMethod('CMSEditLink')) {
+        if (!$container->hasMethod('getCMSEditLink')) {
             return null;
         }
 
-        $cmsEditLink = $container->CMSEditLink();
-        $id = $this->getField('ID');
-
-        if (is_a($container, SiteConfig::class, false))
-        {
-            $link = Controller::join_links(
-                $cmsEditLink,
-                'EditForm/field/' . $relationName . '/item/',
-                $id
-            );
-        }
-        elseif (is_a($container, SiteTree::class, false))
-        {
-            $link = Controller::join_links(
-                CMSPageEditController::singleton()->Link('EditForm'),
-                $container->getField('ID'),
-                'field/' . $relationName . '/item/',
-                $id,
-                'edit'
-            );
-
-            /**
-             * Inline-editable blocks link just to Page edit form
-             * - I don't like this, so skipping it for now.
-             */
-            //if ($this->isInlineEditable() && !$directLink) {
-            //  $link = $container->CMSEditLink();
-            //}
+        if ($container->hasMethod('getElementCMSEditLink')) {
+            $link = $container->getElementCMSEditLink($this, $area, $relationName, $container);
         }
         else {
-            $link = Controller::join_links(
-                $cmsEditLink,
-                'ItemEditForm/field/' . $relationName . '/item/',
-                $id
-            );
-            $link = preg_replace('/\/item\/([\d]+)\/edit/', '/item/$1', $link);
+            $cmsEditLink = $container->getCMSEditLink();
+            $id = $this->getField('ID');
+
+            if (is_a($container, SiteConfig::class, false))
+            {
+                $link = Controller::join_links(
+                    $cmsEditLink,
+                    'EditForm/field/' . $relationName . '/item/',
+                    $id
+                );
+            }
+            elseif (is_a($container, SiteTree::class, false))
+            {
+                $link = Controller::join_links(
+                    CMSPageEditController::singleton()->Link('EditForm'),
+                    $container->getField('ID'),
+                    'field/' . $relationName . '/item/',
+                    $id,
+                    'edit'
+                );
+
+                /**
+                 * Inline-editable blocks link just to Page edit form
+                 * - I don't like this, so skipping it for now.
+                 */
+                //if ($this->isInlineEditable() && !$directLink) {
+                //  $link = $container->getCMSEditLink();
+                //}
+            }
+            else {
+                $link = Controller::join_links(
+                    $cmsEditLink,
+                    'ItemEditForm/field/' . $relationName . '/item/',
+                    $id
+                );
+                $link = preg_replace('/\/item\/([\d]+)\/edit/', '/item/$1', $link);
+            }
         }
 
         $this->extend('updateEvoCMSEditLink', $link);

@@ -971,7 +971,7 @@ class BaseElementExtension extends Extension
 
     public function AdvancedEditLink(): ?string
     {
-        return $this->getOwner()->CMSEditLink();
+        return $this->getOwner()->getCMSEditLink();
     }
 
     public function getAdvancedEditMessage(): ?string

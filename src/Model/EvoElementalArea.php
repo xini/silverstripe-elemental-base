@@ -851,7 +851,7 @@ class EvoElementalArea extends ElementalArea
         $container = $this->getContainer();
         if (!is_null($container)) {
             if ($container->hasMethod('CMSEditLink')) {
-                $cmsEditLink = $container->CMSEditLink();
+                $cmsEditLink = $container->getCMSEditLink();
                 if (!empty($cmsEditLink)) {
                     $crumb = DBField::create_field(
                         'HTMLVarchar',
