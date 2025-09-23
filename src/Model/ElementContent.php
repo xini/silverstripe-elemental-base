@@ -13,7 +13,7 @@ class ElementContent extends EvoBaseElement
     private static $description = 'Simple content element';
     private static $icon = 'font-icon-block-content';
 
-    private static $is_title_enabled = false;
+    private static $is_title_enabled = true;
     private static $is_title_required = false;
 
     private static $is_advanced_edit_enabled = true;
@@ -39,7 +39,7 @@ class ElementContent extends EvoBaseElement
     {
         $fields = parent::getCMSFields();
         $fields->addFieldToTab('Root.ContentTabSet.Main',
-            HTMLEditorField::create('Content', $this->fieldLabel('Content'))
+            HTMLEditorField::create('Content', $this->fieldLabel('Content')),
         );
         return $fields;
     }
