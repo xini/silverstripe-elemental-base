@@ -2,6 +2,7 @@
 
 namespace Fromholdio\Elemental\Base\Extensions;
 
+use Ci\App\Elemental\Model\ElementsConfig;
 use DNADesign\Elemental\Controllers\ElementalAreaController;
 use DNADesign\Elemental\Forms\EditFormFactory;
 use DNADesign\Elemental\Models\BaseElement;
@@ -9,10 +10,12 @@ use Fromholdio\CheckboxFieldGroup\CheckboxFieldGroup;
 use Fromholdio\Elemental\Base\Model\EvoBaseElement;
 use SilverStripe\Admin\LeftAndMain;
 use SilverStripe\Assets\Image;
+use SilverStripe\CMS\Controllers\CMSPageEditController;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Control\Controller;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Extension;
+use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\FormField;
 use SilverStripe\Forms\HTMLEditor\HTMLEditorField;
@@ -28,6 +31,7 @@ use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverStripe\ORM\FieldType\DBHTMLVarchar;
 use SilverStripe\Model\List\SS_List;
 use SilverStripe\Security\Permission;
+use SilverStripe\SiteConfig\SiteConfig;
 use SilverStripe\View\Parsers\URLSegmentFilter;
 use Fromholdio\Elemental\Base\EvoElementTrait;
 use Fromholdio\Elemental\Base\Controllers\EvoElementController;
@@ -85,18 +89,13 @@ class BaseElementExtension extends Extension
      * ----------------------------------------------------
      */
 
-    public function Title(): ?string
+    public function getTitle(): ?string
     {
         $curr = Controller::curr();
 //        return !is_null($curr) && is_a($curr, GraphQLController::class, false)
         return !is_null($curr)
             ? $this->getOwner()->getInlineCMSTitle()
             : $this->getOwner()->getLocalTitle();
-    }
-
-    public function getTitle(): ?string
-    {
-        return $this->Title();
     }
 
     public function getLocalTitle(): ?string
@@ -163,14 +162,9 @@ class BaseElementExtension extends Extension
      * with using Title field for both scenarios.
      */
 
-    public function Name(): ?string
-    {
-        return $this->getOwner()->getLocalName();
-    }
-
     public function getName(): ?string
     {
-        return $this->Name();
+        return $this->getOwner()->getLocalName();
     }
 
     public function getLocalName(): ?string
