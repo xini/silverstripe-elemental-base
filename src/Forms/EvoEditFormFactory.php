@@ -7,7 +7,7 @@ use SilverStripe\Control\RequestHandler;
 
 class EvoEditFormFactory extends EditFormFactory
 {
-    protected function getFormFields(RequestHandler $controller = null, $name, $context = [])
+    protected function getFormFields(?RequestHandler $controller, $name, $context = [])
     {
         $fields = $context['Record']->getInlineCMSFields();
         $this->invokeWithExtensions('updateFormFields', $fields, $controller, $name, $context);

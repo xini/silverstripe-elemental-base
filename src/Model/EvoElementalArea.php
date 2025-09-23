@@ -624,10 +624,10 @@ class EvoElementalArea extends ElementalArea
         return $templates;
     }
 
-    public function forTemplate(): ?DBHTMLText
+    public function forTemplate(): string
     {
         $templates = $this->getRenderTemplates();
-        return empty($templates) ? null : $this->renderWith($templates);
+        return empty($templates) ? '' : $this->renderWith($templates);
     }
 
 
