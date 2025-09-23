@@ -33,6 +33,10 @@ SilverStripe\CMS\Controllers\ContentController:
   url_handlers:
     'element/$ID!': 404
 
+DNADesign\Elemental\Controllers\ElementalAreaController:
+  extensions:
+    fioElementalBaseElemntalAreaController: Fromholdio\Elemental\Base\Extensions\ElementalAreaControllerExtension
+
 Page:
   extensions:
     fioElementalBaseAreasContainer: Fromholdio\Elemental\Base\Extensions\ElementalAreasContainer
