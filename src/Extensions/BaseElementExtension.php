@@ -858,9 +858,9 @@ class BaseElementExtension extends Extension
         $scaffoldFields = $baseInstance->scaffoldFormFields([
             'tabbed' => false,
             'includeRelations' => false,
-            'restrictFields' => false,
-            'fieldClasses' => false,
-            'ajaxSafe' => true
+            'restrictFields' => [],
+//            'fieldClasses' => false,
+//            'ajaxSafe' => true
         ]);
 
         $scaffoldFields->removeByName([
