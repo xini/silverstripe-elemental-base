@@ -286,7 +286,16 @@ class EvoElementalArea extends ElementalArea
                 return $elements;
             }
         }
-        $elements = $this->getComponents('Elements');
+        $replaceElements = $this->getReplaceElements();
+        if ($replaceElements->count()) {
+            $elements = $replaceElements;
+        } else {
+            $elements = $this->getComponents('Elements');
+        }
+        $mergeElements = $this->getMergeElements();
+        if ($mergeElements->count()) {
+            $elements->merge($mergeElements);
+        }
         $this->localElements = $elements;
         return $elements;
     }
@@ -371,6 +380,92 @@ class EvoElementalArea extends ElementalArea
             $element->setExtraData($data);
             $counter++;
         }
+    }
+
+
+    protected ?SS_List $mergeElements = null;
+    protected ?SS_List $replaceElements = null;
+
+    public function setMergeElements(?SS_List $elements): self
+    {
+        $this->mergeElements = $elements;
+        return $this;
+    }
+
+    public function addMergeElements(SS_List $elements): self
+    {
+        $mergeElements = $this->mergeElements;
+        if (is_null($mergeElements)) {
+            $mergeElements = $elements;
+        } else {
+            $mergeElements->merge($elements);
+        }
+        $this->mergeElements = $mergeElements;
+        return $this;
+    }
+
+    public function getMergeElements(): SS_List
+    {
+        return $this->mergeElements ?? ArrayList::create();
+    }
+
+    public function mergeWithArea(?EvoElementalArea $area, bool $doOverride = false): self
+    {
+        if (is_null($area) || $area->ID === $this->ID) {
+            return $this;
+        }
+        $elements = $area->getAllLocalElements();
+        if ($doOverride) {
+            $this->setMergeElements($elements);
+        } else {
+            $this->addMergeElements($elements);
+        }
+        $this->localElements = null;
+        $this->allElements = null;
+        $this->elements = null;
+        $this->elementsByID = [];
+        return $this;
+    }
+
+    public function setReplaceElements(?SS_List $elements): self
+    {
+        $this->replaceElements = $elements;
+        return $this;
+    }
+
+    public function addReplaceElements(SS_List $elements): self
+    {
+        $replaceElements = $this->replaceElements;
+        if (is_null($replaceElements)) {
+            $replaceElements = $elements;
+        } else {
+            $replaceElements->merge($elements);
+        }
+        $this->replaceElements = $replaceElements;
+        return $this;
+    }
+
+    public function getReplaceElements(): SS_List
+    {
+        return $this->replaceElements ?? ArrayList::create();
+    }
+
+    public function replaceWithArea(?EvoElementalArea $area, bool $doOverride = false): self
+    {
+        if (is_null($area) || $area->ID === $this->ID) {
+            return $this;
+        }
+        $elements = $area->getAllLocalElements();
+        if ($doOverride) {
+            $this->setReplaceElements($elements);
+        } else {
+            $this->addReplaceElements($elements);
+        }
+        $this->localElements = null;
+        $this->allElements = null;
+        $this->elements = null;
+        $this->elementsByID = [];
+        return $this;
     }
 
 
