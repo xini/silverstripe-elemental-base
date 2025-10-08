@@ -98,8 +98,11 @@ trait EvoElementTrait
                     $id
                 );
             }
-            elseif (is_a($container, SiteTree::class, false))
-            {
+            elseif (
+                is_a($container, SiteTree::class, false)
+                // Needs extra check else ModelAdmin-managed SiteTree's can't render element detail view
+                && str_contains($cmsEditLink, 'admin/pages')
+            ) {
                 $link = Controller::join_links(
                     CMSPageEditController::singleton()->Link('EditForm'),
                     $container->getField('ID'),
@@ -275,14 +278,43 @@ trait EvoElementTrait
 
     public function getController(): EvoElementController
     {
-        $controller = parent::getController();
-        if (!is_a($controller, EvoElementController::class, false)) {
+        // Check if controller is already cached
+        if ($this->controller) {
+            return $this->controller;
+        }
+
+        // Get controller class
+        $controllerClass = static::config()->controller_class;
+
+        if (!class_exists($controllerClass ?? '')) {
+            throw new \Exception(
+                'Could not find controller class ' . $controllerClass . ' as defined in ' . static::class
+            );
+        }
+
+        // Create controller
+        $this->controller = \SilverStripe\Core\Injector\Injector::inst()->create($controllerClass, $this);
+
+        // Set the request from the current controller if available
+        // This ensures element controllers have access to GET/POST parameters
+        // when rendered in templates (not just when accessed via URL routing)
+        // IMPORTANT: This must happen BEFORE doInit() is called
+        $curr = Controller::curr();
+        if ($curr && $curr->getRequest()) {
+            $this->controller->setRequest($curr->getRequest());
+        }
+
+        // Now call doInit() - at this point the request is set
+        $this->controller->doInit();
+
+        if (!is_a($this->controller, EvoElementController::class, false)) {
             throw new \LogicException(
                 'BaseElement objects require a Controller that is, '
                 . 'or is a subclass of, EvoElementController.'
             );
         }
-        return $controller;
+
+        return $this->controller;
     }
 
     public function getPage(): ?SiteTree

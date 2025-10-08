@@ -2,7 +2,6 @@
 
 namespace Fromholdio\Elemental\Base\Extensions;
 
-use Ci\App\Elemental\Model\SiteBelowElementsConfig;
 use DNADesign\Elemental\Models\BaseElement;
 use Fromholdio\CMSFieldsPlacement\CMSFieldsPlacement;
 use LeKoala\CmsActions\CustomAction;
@@ -21,6 +20,12 @@ class ElementalAreasContainer extends Extension
 
     private static $has_many = [
         'ContainedAreas' => EvoElementalArea::class . '.ParentContainer'
+    ];
+
+    private static $scaffold_cms_fields_settings = [
+        'ignoreRelations' => [
+            'ContainedAreas',
+        ],
     ];
 
     /**
@@ -102,6 +107,7 @@ class ElementalAreasContainer extends Extension
         $containerClass = get_class($this->getOwner());
 
         $containersWithMissingAreas = $containerClass::get()->filterAny($filterAny);
+
         foreach ($containersWithMissingAreas as $container)
         {
             $container->requireLocalElementalAreas();
@@ -127,7 +133,7 @@ class ElementalAreasContainer extends Extension
 
     public function requireLocalElementalArea(string $name): void
     {
-        if (Versioned::get_stage() !== Versioned::DRAFT) {
+        if (Versioned::get_stage() === Versioned::LIVE) {
             return;
         }
         if (!$this->getOwner()->isValidElementalAreaName($name)) {
@@ -333,8 +339,25 @@ class ElementalAreasContainer extends Extension
         if (is_null($area)) {
             $area = $this->getOwner()->getLocalElementalArea($name);
         }
-        if (is_null($area)) {
-            return null;
+        if (is_null($area))
+        {
+            if (Versioned::get_stage() === Versioned::LIVE)
+            {
+                Versioned::set_stage(Versioned::DRAFT);
+                $containerClass = get_class($this->getOwner());
+                $containerID = $this->getOwner()->getField('ID');
+                $stgContainer = $containerClass::get()->find('ID', $containerID);
+                $stgArea = $stgContainer?->getElementalArea($name);
+                if (!is_null($stgArea)) {
+                    $stgArea->publishSingle();
+                }
+                Versioned::set_stage(Versioned::LIVE);
+                $liveContainer = $containerClass::get()->find('ID', $containerID);
+                $area = $liveContainer?->getElementalArea($name);
+            }
+            if (is_null($area)) {
+                return null;
+            }
         }
         $area->setCurrentName($name);
         $area->setCurrentContainer($this->getOwner());
@@ -380,7 +403,8 @@ class ElementalAreasContainer extends Extension
             }
         }
         if (!is_null($area)) {
-            $area->setCurrentContainer($this->getOwner(), $name);
+            $area->setCurrentName($name);
+            $area->setCurrentContainer($this->getOwner());
         }
         return $area;
     }

@@ -10,7 +10,7 @@ class ElementContent extends EvoBaseElement
     private static $table_name = 'EvoElementContent';
     private static $singular_name = 'Content';
     private static $plural_name = 'Content';
-    private static $description = 'Simple content element';
+    private static $class_description = 'Simple content element';
     private static $icon = 'font-icon-block-content';
 
     private static $is_title_enabled = true;
@@ -48,7 +48,7 @@ class ElementContent extends EvoBaseElement
     {
         $fields->addFieldToTab('Root.Main',
             HTMLEditorField::create('Content', $this->fieldLabel('Content'))
-                ->setRows(10)
+                ->setRows(10),
         );
     }
 }

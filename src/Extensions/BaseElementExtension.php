@@ -838,12 +838,6 @@ class BaseElementExtension extends Extension
 
     public function getInlineCMSFields(): FieldList
     {
-        $fields = FieldList::create(
-            TabSet::create('Root',
-                $mainTab = Tab::create('Main', $this->getOwner()->fieldLabel('Main'))
-            )
-        );
-
         $baseInstance = EvoBaseElement::singleton();
         $scaffoldFields = $baseInstance->scaffoldFormFields([
             'tabbed' => false,
@@ -866,6 +860,26 @@ class BaseElementExtension extends Extension
             'ShowInMenusGroup',
         ]);
 
+        /**
+         * In form factory, make namespacing recursive through a level of tabset/tabs,
+         * so that field names are saveable - and then check that the handler accepts the
+         * nested fields too.
+         */
+
+        $fields = FieldList::create(
+            $rootTabSet = TabSet::create('Root',
+                $mainTab = Tab::create('Main', $this->getOwner()->fieldLabel('Main')),
+//                Tab::create('Main', 'Main', ...$scaffoldFields->toArray()),
+//                $mainTab = TabSet::create('Main', $this->getOwner()->fieldLabel('Main'),
+//                    Tab::create('Another', ...$scaffoldFields->toArray()),
+//                    Tab::create('Overthere', TextField::create('Blahblah')),
+//                ),
+                $settingsTab = Tab::create('Settings', $this->getOwner()->fieldLabel('Settings')),
+            )
+        );
+
+        $rootTabSet->setSchemaState(['hideNav' => true]);
+
         $htmlTextRows = (int) EditFormFactory::config()->get('html_field_rows');
         if ($htmlTextRows < 1) {
             $htmlTextRows = 7;
@@ -886,11 +900,6 @@ class BaseElementExtension extends Extension
             $fields->removeByName('Title');
         }
 
-        $rootTabSet = $fields->findOrMakeTab('Root');
-        $rootTabSet->setSchemaState(['hideNav' => true]);
-
-        $settingsTab = $fields->findOrMakeTab('Root.Settings');
-
         if (!$this->isTitleEnabled()) {
             $nameField = $this->getOwner()->getNameField();
             $settingsTab->push($nameField);
@@ -908,10 +917,15 @@ class BaseElementExtension extends Extension
             $settingsTab->push($isMenuField);
         }
 
+        $settingsTab->push(TextField::create('Test', 'Test field here'));
+
         $this->getOwner()->invokeWithExtensions('updateInlineCMSFields', $fields);
 
         if ($this->getOwner()->isAdvancedEditEnabled())
         {
+//            $advButton = $this->getOwner()->getAdvancedEditButtonField();
+//            $mainTab->push($advButton);
+
             $rootTabSet = $fields->findOrMakeTab('Root');
             /** @var Tab $firstTab */
             $firstTab = $rootTabSet->Tabs()->first();
