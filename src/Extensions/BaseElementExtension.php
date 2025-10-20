@@ -2,7 +2,6 @@
 
 namespace Fromholdio\Elemental\Base\Extensions;
 
-use Ci\App\Elemental\Model\ElementsConfig;
 use DNADesign\Elemental\Controllers\ElementalAreaController;
 use DNADesign\Elemental\Forms\EditFormFactory;
 use DNADesign\Elemental\Models\BaseElement;
