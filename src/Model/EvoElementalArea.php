@@ -278,6 +278,11 @@ class EvoElementalArea extends ElementalArea
         return $this->getElements()->count() < 1;
     }
 
+    public function hasElements(): bool
+    {
+        return !$this->isAreaEmpty();
+    }
+
     public function getAllLocalElements(bool $doUseCache = true): SS_List
     {
         if ($doUseCache) {
