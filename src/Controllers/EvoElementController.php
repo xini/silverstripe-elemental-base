@@ -4,19 +4,34 @@ namespace Fromholdio\Elemental\Base\Controllers;
 
 use DNADesign\Elemental\Controllers\ElementController;
 use DNADesign\Elemental\Models\BaseElement;
+use Fromholdio\Elemental\Base\Extensions\ElementsRouter;
 use SilverStripe\Control\Controller;
+use SilverStripe\Model\ModelDataCustomised;
 use SilverStripe\View\SSViewer;
 
 class EvoElementController extends ElementController
 {
+    private static $extensions = [
+        ElementsRouter::class,
+    ];
+
     /**
      * Templates/Rendering
      * ----------------------------------------------------
      */
 
-    public function ElementForTemplate(): BaseElement
+    public function ElementForTemplate(): ModelDataCustomised
     {
-        return $this->getElement();
+        $custom = $this->getCustomDataForTemplate();
+        $element = $this->getElement();
+        return $element->customise($custom);
+    }
+
+    public function getCustomDataForTemplate(): array
+    {
+        $data = [];
+        $this->extend('updateCustomDataForTemplate', $data);
+        return $data;
     }
 
     public function forTemplate(): string

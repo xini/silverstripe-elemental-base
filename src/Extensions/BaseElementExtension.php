@@ -23,7 +23,6 @@ use SilverStripe\Forms\Tab;
 use SilverStripe\Forms\TabSet;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Model\List\ArrayList;
-#use SilverStripe\GraphQL\Controller as GraphQLController;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBField;
 use SilverStripe\ORM\FieldType\DBHTMLText;
@@ -485,11 +484,23 @@ class BaseElementExtension extends Extension
         $classes = array_reverse($classes);
         $baseClass = BaseElement::class;
         $classTemplates = [];
+        $this->getOwner()->getAreaTypes();
         $areaName = $this->getOwner()->getAreaName();
+        $areaTypes = $this->getOwner()->getAreaTypes();
         foreach ($classes as $key => $class)
         {
+            if (!empty($areaTypes) && !empty($areaName)) {
+                foreach ($areaTypes as $areaType) {
+                    $classTemplates[$class][] = $class .'_'. $areaType . '_' . $areaName . $suffix;
+                }
+            }
             if (!empty($areaName)) {
                 $classTemplates[$class][] = $class . '_' . $areaName . $suffix;
+            }
+            if (!empty($areaTypes)) {
+                foreach ($areaTypes as $areaType) {
+                    $classTemplates[$class][] = $class . '_' . $areaType . $suffix;
+                }
             }
             $classTemplates[$class][] = $class . $suffix;
             if ($class === $baseClass) {
@@ -539,6 +550,18 @@ class BaseElementExtension extends Extension
         $name = is_null($area) ? null : $area->getName();
         $this->getOwner()->setCachedAreaName($name);
         return $name;
+    }
+
+    public function getAreaTypes(): array
+    {
+        $types = $this->getOwner()->getCachedAreaTypes();
+        if (!empty($types)) {
+            return $types;
+        }
+        $area = $this->getOwner()->getArea();
+        $types = is_null($area) ? null : $area->getTypes();
+        $this->getOwner()->setCachedAreaTypes($types);
+        return $types;
     }
 
     public function getLocalArea(bool $doUseCache = true): ?EvoElementalArea
@@ -628,16 +651,8 @@ class BaseElementExtension extends Extension
 
     public function getHandlerURLSegment(): ?string
     {
-        $segment = null;
-        $area = $this->getTopArea();
-        if (!is_null($area)) {
-            $segment = Controller::join_links(
-                'area',
-                $area->getURLSegment(),
-                $this->getOwner()->getField('ID')
-            );
-        }
-        return $segment;
+        $area = $this->getArea();
+        return $area?->getHandlerURLSegment($this->owner->ID);
     }
 
 
@@ -838,12 +853,14 @@ class BaseElementExtension extends Extension
     public function getInlineCMSFields(): FieldList
     {
         $baseInstance = EvoBaseElement::singleton();
+        $scaffoldSettings = $this->owner->config()->get('scaffold_cms_fields_settings') ?? [];
         $scaffoldFields = $baseInstance->scaffoldFormFields([
             'tabbed' => false,
             'includeRelations' => false,
             'restrictFields' => [],
 //            'fieldClasses' => false,
 //            'ajaxSafe' => true
+            ...$scaffoldSettings,
         ]);
 
         $scaffoldFields->removeByName([
@@ -857,6 +874,7 @@ class BaseElementExtension extends Extension
             'CMSName',
             'ParentID',
             'ShowInMenusGroup',
+            'TopPageID',
         ]);
 
         /**
@@ -916,7 +934,7 @@ class BaseElementExtension extends Extension
             $settingsTab->push($isMenuField);
         }
 
-        $settingsTab->push(TextField::create('Test', 'Test field here'));
+        //$settingsTab->push(TextField::create('Test', 'Test field here'));
 
         $this->getOwner()->invokeWithExtensions('updateInlineCMSFields', $fields);
 
@@ -1031,7 +1049,7 @@ class BaseElementExtension extends Extension
         return (bool) $this->getOwner()->config()->get('is_cms_history_enabled');
     }
 
-    public function updateCMSFields(FieldList $fields): void
+    public function overrideCoreCMSFields(FieldList $fields): FieldList
     {
         $fields->removeByName([
             'ExtraClass',
@@ -1074,6 +1092,8 @@ class BaseElementExtension extends Extension
             $isMenuField = $this->getOwner()->getMenuVisibilityField();
             $settingsTab->push($isMenuField);
         }
+
+        return $fields;
     }
 
     public function insertContentTabSet(FieldList $fields): FieldList
@@ -1153,8 +1173,14 @@ class BaseElementExtension extends Extension
     public function isAdminCurrController(): bool
     {
         $curr = Controller::curr();
-        return is_a($curr, LeftAndMain::class, false);
-//            || is_a($curr, GraphQLController::class, false);
+        if (is_a($curr, LeftAndMain::class, false)) {
+            return true;
+        }
+        if (is_a($curr, ElementalAreaController::class, false)) {
+            $url = $curr->getRequest()->getURL() ?? '';
+            return str_starts_with($url, 'admin/');
+        }
+        return false;
     }
 
     public function isBaseElement(): bool

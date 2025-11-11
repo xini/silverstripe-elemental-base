@@ -19,6 +19,7 @@ use Fromholdio\Elemental\Base\Model\EvoElementalArea;
 trait EvoElementTrait
 {
     protected ?string $areaName = null;
+    protected array $areaTypes = [];
     protected ?EvoElementalArea $localArea = null;
     protected ?EvoElementalArea $currentArea = null;
     protected ?BaseElement $providerElement = null;
@@ -93,7 +94,7 @@ trait EvoElementTrait
             if (is_a($container, SiteConfig::class, false))
             {
                 $link = Controller::join_links(
-                    $cmsEditLink,
+                    $container->CMSEditLink(),
                     'EditForm/field/' . $relationName . '/item/',
                     $id
                 );
@@ -211,6 +212,17 @@ trait EvoElementTrait
     public function getCachedAreaName(): ?string
     {
         return $this->areaName;
+    }
+
+    public function setCachedAreaTypes(array $types): self
+    {
+        $this->areaTypes = $types;
+        return $this;
+    }
+
+    public function getCachedAreaTypes(): array
+    {
+        return $this->areaTypes;
     }
 
     public function setCachedLocalArea(?EvoElementalArea $area): self

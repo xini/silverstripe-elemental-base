@@ -54,19 +54,29 @@ class ElementalAreasContainer extends Extension
             return;
         }
 
-        $action = CustomAction::create('doPublishWithAreas', 'Publish (including all blocks)')
-            ->setShouldRefresh(true)
-            ->addExtraClass('btn-outline-primary')
-            ->removeExtraClass('btn-info');
+        $action = CustomAction::create('doPublishWithAreas', 'Publish with blocks');
+        $action->setDropUp(true);
+//        $action->setShouldRefresh(true);
+//        $action->setButtonIcon(SilverStripeIcons::ICON_ROCKET);
+        $action->setConfirmation('This will publish the page including all blocks, and may take a few moments longer than normal. Continue?');
+        $action->addExtraClass('btn-secondary');
+        $action->setRedirectURL($this->owner->getCMSEditLink());
 
-        $MajorActions = $actions->fieldByName('MajorActions');
+        $actions->push($action);
 
-        if ($MajorActions) {
-            $MajorActions->push($action);
-        } else {
-            $actions->push($action);
-            $action->setAttribute('style', 'margin-left:auto;');
-        }
+//        $action = CustomAction::create('doPublishWithAreas', 'Publish (including all blocks)')
+//            ->setShouldRefresh(true)
+//            ->addExtraClass('btn-outline-primary')
+//            ->removeExtraClass('btn-info');
+//
+//        $MajorActions = $actions->fieldByName('MajorActions');
+//
+//        if ($MajorActions) {
+//            $MajorActions->push($action);
+//        } else {
+//            $actions->push($action);
+//            $action->setAttribute('style', 'margin-left:auto;');
+//        }
     }
 
     public function doPublishWithAreas()
@@ -396,7 +406,9 @@ class ElementalAreasContainer extends Extension
             $config = $this->getOwner()->getElementalAreaConfig($name);
             if (!is_null($config)) {
                 $currentMethodName = $config['current'] ?? $name;
-                $area = $this->getOwner()->{$currentMethodName}($name);
+                if ($this->getOwner()->hasMethod($currentMethodName)) {
+                    $area = $this->getOwner()->{$currentMethodName}($name);
+                }
                 if (!$area || !$area->exists() || !is_a($area, EvoElementalArea::class, false)) {
                     $area = null;
                 }
@@ -503,7 +515,9 @@ class ElementalAreasContainer extends Extension
 
     public function getElementalTopArea(): ?EvoElementalArea
     {
-        return null;
+        return $this->getOwner()->hasMethod('getTopArea')
+            ? $this->getOwner()->getTopArea()
+            : null;
     }
 
     /**
@@ -550,6 +564,36 @@ class ElementalAreasContainer extends Extension
      * ----------------------------------------------------
      */
 
+    public function getElementalAreaCMSFields(string $areaName): FieldList
+    {
+        $fields = FieldList::create();
+
+        if (empty($areaName)) {
+            return $fields;
+        }
+
+        if (!$this->getOwner()->isElementalAreaEnabled($areaName)) {
+            return $fields;
+        }
+
+        $relationName = $this->getOwner()->getElementalAreaRelationName($areaName);
+        if (empty($relationName)) {
+            return $fields;
+        }
+
+        $area = $this->getOwner()->getElementalArea($areaName);
+        if (is_null($area)) {
+            return $fields;
+        }
+
+        $areaFields = $area->provideElementalAreaCMSFields($relationName);
+        if ($areaFields->count() < 1) {
+            return $fields;
+        }
+
+        return $areaFields;
+    }
+
     public function updateCMSFields(FieldList $fields): void
     {
         $areas = $this->getOwner()->getLocalElementalAreas();
@@ -563,10 +607,7 @@ class ElementalAreasContainer extends Extension
             $cmsFieldsConfig = $this->getOwner()->getElementalAreaConfig($areaName)['cms_fields'] ?? null;
             if (empty($cmsFieldsConfig)) continue;
 
-            $relationName = $this->getOwner()->getElementalAreaRelationName($areaName);
-            if (empty($relationName)) continue;
-
-            $areaFields = $area->provideElementalAreaCMSFields($relationName);
+            $areaFields = $this->getOwner()->getElementalAreaCMSFields($areaName);
             if ($areaFields->count() < 1) continue;
 
             $fields = CMSFieldsPlacement::placeFields(

@@ -29,7 +29,7 @@ SilverStripe\Core\Injector\Injector:
 
 SilverStripe\CMS\Controllers\ContentController:
   extensions:
-    fioElementalBaseContentController: Fromholdio\Elemental\Base\Extensions\ElementalContentControllerExtension
+    fioElementalBaseElementalRouter: Fromholdio\Elemental\Base\Extensions\ElementsRouter
   url_handlers:
     'element/$ID!': 404
 

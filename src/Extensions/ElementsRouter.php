@@ -6,7 +6,7 @@ use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Core\Extension;
 use Fromholdio\Elemental\Base\Controllers\EvoElementController;
 
-class ElementalContentControllerExtension extends Extension
+class ElementsRouter extends Extension
 {
     private static $handled_elemental_area_names;
 

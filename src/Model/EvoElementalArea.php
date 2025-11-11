@@ -6,6 +6,7 @@ use DNADesign\Elemental\Forms\ElementalAreaField;
 use DNADesign\Elemental\Models\BaseElement;
 use DNADesign\Elemental\Models\ElementalArea;
 use SilverStripe\CMS\Model\SiteTree;
+use SilverStripe\Control\Controller;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Forms\FieldList;
@@ -342,6 +343,10 @@ class EvoElementalArea extends ElementalArea
                 }
             }
         }
+
+        $container = $this->getContainer();
+        $container->invokeWithExtensions('updateAreaAllElements', $elements, $this);
+
         $this->allElements = $elements;
         return $elements;
     }
@@ -687,6 +692,44 @@ class EvoElementalArea extends ElementalArea
         $topPage = is_null($container) ? null : $container->getElementalTopPage();
         $this->topPage = $topPage;
         return $topPage;
+    }
+
+    public function getTypes(): array
+    {
+        $types = [];
+        $classes = array_reverse(ClassInfo::ancestry($this));
+        foreach ($classes as $class) {
+            if ($class === self::class) {
+                break;
+            }
+            $type = ClassInfo::shortName($class);
+            if (str_ends_with($type, 'ElementalArea')) {
+                $type = substr($type, 0, -13);
+            }
+            $types[] = $type;
+        }
+        return $types;
+    }
+
+    public function getHandlerURLSegment(?string $action = null): ?string
+    {
+        $segment = $this->getURLSegment();
+        if (empty($segment)) {
+            $segment = null;
+        }
+        else {
+            $container = $this->getContainer();
+            if ($container?->hasMethod('getHandlerURLSegment')) {
+                $containerSegment = $container->getHandlerURLSegment();
+            }
+            $segment = Controller::join_links(
+                $containerSegment ?? null,
+                'area',
+                $segment,
+                $action
+            );
+        }
+        return $segment;
     }
 
 

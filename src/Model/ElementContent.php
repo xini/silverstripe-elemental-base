@@ -35,13 +35,21 @@ class ElementContent extends EvoBaseElement
         'Content' => 'HTMLText'
     ];
 
+    private static $scaffold_cms_fields_settings = [
+        'ignoreFields' => [
+            'Content',
+        ],
+    ];
+
     public function getCMSFields(): FieldList
     {
-        $fields = parent::getCMSFields();
-        $fields->addFieldToTab('Root.ContentTabSet.Main',
-            HTMLEditorField::create('Content', $this->fieldLabel('Content')),
-        );
-        return $fields;
+        $this->beforeUpdateCMSFields(function (FieldList $fields) {
+            $fields->addFieldToTab('Root.Main',
+                HTMLEditorField::create('Content', $this->fieldLabel('Content')),
+            );
+        });
+
+        return parent::getCMSFields();
     }
 
     public function updateInlineCMSFields(FieldList $fields): void
