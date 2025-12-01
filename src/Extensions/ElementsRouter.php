@@ -2,9 +2,9 @@
 
 namespace Fromholdio\Elemental\Base\Extensions;
 
-use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Core\Extension;
 use Fromholdio\Elemental\Base\Controllers\EvoElementController;
+use SilverStripe\ORM\DataObject;
 
 class ElementsRouter extends Extension
 {
@@ -28,9 +28,9 @@ class ElementsRouter extends Extension
     {
         $request = $this->getOwner()->getRequest();
 
-        /** @var SiteTree&ElementalAreasContainer $page */
-        $page = $this->getOwner()->data();
-        if (!$page::has_extension(ElementalAreasContainer::class)) {
+        /** @var DataObject&ElementalAreasContainer $container */
+        $container = $this->getOwner()->data();
+        if (!$container::has_extension(ElementalAreasContainer::class)) {
             return $this->getOwner()->httpError(404);
         }
 
@@ -47,19 +47,20 @@ class ElementsRouter extends Extension
             $areaURLSegment = null;
         }
 
+        $area = null;
         $handledAreaNames = $this->getOwner()->getHandledElementalAreaNames();
         if (empty($areaURLSegment)) {
-            $element = $page->getElementByID($elementID, $handledAreaNames);
+            $element = $container->getCurrentElementByID($elementID, $handledAreaNames);
         }
         else {
-            $area = $page->getElementalAreaByURLSegment($areaURLSegment);
+            $area = $container->getElementalAreaByURLSegment($areaURLSegment);
             if (is_null($area)) {
                 return $this->getOwner()->httpError(404, 'Invalid area ID supplied');
             }
             if (is_array($handledAreaNames) && !in_array($area->getName(), $handledAreaNames, true)) {
                 return $this->getOwner()->httpError(404, 'Area not supported');
             }
-            $element = $area->getElementByID($elementID);
+            $element = $area->getCurrentElementByID($elementID);
         }
 
         if (is_null($element)) {

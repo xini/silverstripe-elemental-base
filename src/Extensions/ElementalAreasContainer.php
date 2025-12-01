@@ -558,6 +558,25 @@ class ElementalAreasContainer extends Extension
         return $element;
     }
 
+    public function getCurrentElementByID(int $id, ?array $areaNames = null): ?BaseElement
+    {
+        $element = null;
+        $names = $this->getOwner()->getElementalAreaNames();
+        foreach ($names as $name) {
+            if (is_null($areaNames) || in_array($name, $areaNames, true))
+            {
+                $area = $this->getOwner()->getElementalArea($name);
+                if (!is_null($area)) {
+                    $element = $area->getCurrentElementByID($id);
+                    if (!is_null($element)) {
+                        break;
+                    }
+                }
+            }
+        }
+        return $element;
+    }
+
 
     /**
      * CMS fields

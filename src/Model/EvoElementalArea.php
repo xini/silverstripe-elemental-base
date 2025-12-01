@@ -635,6 +635,31 @@ class EvoElementalArea extends ElementalArea
         return $this->doCacheElementByID($id, $element);
     }
 
+    public function getCurrentElementByID(int $id): ?BaseElement
+    {
+        $cachedElementsArray = $this->elementsByID;
+        $element = $cachedElementsArray[$id] ?? null;
+        if (!is_null($element)) {
+            return $element;
+        }
+
+        $allElements = $this->getAllElements();
+        $element = $allElements->find('ID', $id);
+        if (!is_null($element)) {
+            return $this->doCacheElementByID($id, $element);
+        }
+
+        foreach ($allElements as $areaElement)
+        {
+            if ($areaElement::has_extension(ElementalAreasContainer::class, false)) {
+                $element = $areaElement->getCurrentElementByID($id);
+                if (!is_null($element)) {
+                    break;
+                }
+            }
+        }
+        return $this->doCacheElementByID($id, $element);
+    }
 
     /**
      * Elemental hierarchy helpers
