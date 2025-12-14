@@ -28,6 +28,7 @@ use SilverStripe\ORM\FieldType\DBField;
 use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverStripe\ORM\FieldType\DBHTMLVarchar;
 use SilverStripe\Model\List\SS_List;
+use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
 use SilverStripe\SiteConfig\SiteConfig;
 use SilverStripe\View\Parsers\URLSegmentFilter;
@@ -1188,59 +1189,63 @@ class BaseElementExtension extends Extension
         return get_class($this->getOwner()) === BaseElement::class;
     }
 
+    public function getCanPermissionCode(string $action): string
+    {
+        return strtoupper($action) . '_ELEMENT_' . strtoupper($this->getOwner()->getShortClassName());
+    }
+
+    public function checkPermissionCode(string $action, ?Member $member = null): bool
+    {
+        $code = $this->owner->getCanPermissionCode($action);
+        $manageCode = $this->owner->getCanPermissionCode('manage');
+        $allCode = 'MANAGE_ELEMENTS_ALL';
+        $can = (bool) Permission::checkMember($member, $code);
+        if (!$can) {
+            $can = (bool) Permission::checkMember($member, $manageCode);
+            if (!$can) {
+                $can = (bool) Permission::checkMember($member, $allCode);
+            }
+        }
+        return $can;
+    }
+
     public function canView($member = null): ?bool
     {
         if (!$this->getOwner()->isAdminCurrController()) {
             return !$this->getOwner()->isElementEmpty();
         }
-        $hasCMSAccess = Permission::check('CMS_ACCESS', 'any', $member);
-        if ($this->getOwner()->isBaseElement()) {
-            return $hasCMSAccess ? true : null;
-        }
+        $can = $this->owner->checkPermissionCode('view', $member);
         $area = $this->getOwner()->getArea();
-        if (!is_null($area)) {
-            return $area->canView($member);
-        }
-        return $hasCMSAccess ? true : null;
+        return is_null($area)
+            ? $can
+            : $can && $area->canView($member);
     }
 
     public function canEdit($member = null): ?bool
     {
-        $hasCMSAccess = Permission::check('CMS_ACCESS', 'any', $member);
-        if ($this->getOwner()->isBaseElement()) {
-            return $hasCMSAccess ? true : null;
-        }
-        $area = $this->getOwner()->getArea();
-        if (!is_null($area)) {
-            return $area->canEdit($member);
-        }
-        return $hasCMSAccess ? true : null;
+        $can = $this->owner->checkPermissionCode('edit', $member);
+        $area = $this->owner->getArea();
+        return is_null($area)
+            ? $can
+            : $can && $area->canEdit($member);
     }
 
     public function canCreate($member = null, $context = []): ?bool
     {
-        $hasCMSAccess = Permission::check('CMS_ACCESS', 'any', $member);
-        if ($this->getOwner()->isBaseElement()) {
-            return $hasCMSAccess ? true : null;
-        }
-        $area = $this->getOwner()->getArea();
-        if (!is_null($area)) {
-            return $area->canCreate($member, $context);
-        }
-        return $hasCMSAccess ? true : null;
+        $can = $this->owner->checkPermissionCode('create', $member);
+        $area = $this->owner->getArea();
+        return is_null($area)
+            ? $can
+            : $can && $area->canCreate($member, $context);
     }
 
     public function canDelete($member = null): ?bool
     {
-        $hasCMSAccess = Permission::check('CMS_ACCESS', 'any', $member);
-        if ($this->getOwner()->isBaseElement()) {
-            return $hasCMSAccess ? true : null;
-        }
+        $can = $this->owner->checkPermissionCode('delete', $member);
         $area = $this->getOwner()->getArea();
-        if (!is_null($area)) {
-            return $area->canDelete($member);
-        }
-        return $hasCMSAccess ? true : null;
+        return is_null($area)
+            ? $can
+            : $can && $area->canDelete($member);
     }
 
 
