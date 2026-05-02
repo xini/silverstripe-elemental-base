@@ -26,10 +26,7 @@
   "extra": {
     "expose": [
       "client/dist"
-    ],
-    "branch-alias": {
-      "dev-3.x": "3.0.x-dev"
-    }
+    ]
   },
   "prefer-stable": true,
   "minimum-stability": "dev"
