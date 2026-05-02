@@ -918,7 +918,7 @@ class BaseElementExtension extends Extension
             $fields->removeByName('Title');
         }
 
-        if (!$this->isTitleEnabled()) {
+        if (!$this->getOwner()->isTitleEnabled()) {
             $nameField = $this->getOwner()->getNameField();
             $settingsTab->push($nameField);
         }
@@ -967,17 +967,6 @@ class BaseElementExtension extends Extension
 
         return $fields;
     }
-
-    public function beforeUpdateInlineCMSFields(callable $callback): void
-    {
-        $this->getOwner()->beforeExtending('updateInlineCMSFields', $callback);
-    }
-
-    public function afterUpdateInlineCMSFields(callable $callback): void
-    {
-        $this->getOwner()->afterExtending('updateInlineCMSFields', $callback);
-    }
-
 
     /**
      * Advanced Edit button/message for Inline/React form

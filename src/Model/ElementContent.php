@@ -52,11 +52,15 @@ class ElementContent extends EvoBaseElement
         return parent::getCMSFields();
     }
 
-    public function updateInlineCMSFields(FieldList $fields): void
+    public function getInlineCMSFields(): FieldList
     {
-        $fields->addFieldToTab('Root.Main',
-            HTMLEditorField::create('Content', $this->fieldLabel('Content'))
-                ->setRows(10),
-        );
+        $this->beforeUpdateInlineCMSFields(function (FieldList $fields) {
+            $fields->addFieldToTab('Root.Main',
+                HTMLEditorField::create('Content', $this->fieldLabel('Content'))
+                    ->setRows(10),
+            );
+        });
+
+        return parent::getInlineCMSFields();
     }
 }

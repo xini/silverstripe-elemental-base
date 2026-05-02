@@ -618,6 +618,10 @@ class EvoElementalArea extends ElementalArea
         $areaElements = $this->getAllElements();
         foreach ($areaElements as $areaElement)
         {
+            if ((int) $areaElement->ID === $id) {
+                $element = $areaElement;
+                break;
+            }
             $providedElements = $areaElement->provideElements();
             if (!is_null($providedElements)) {
                 $element = $providedElements->find('ID', $id);

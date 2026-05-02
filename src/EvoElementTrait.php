@@ -39,8 +39,7 @@ trait EvoElementTrait
         if (!is_null($container) && $container->hasMethod('Link'))
         {
             $link = Controller::join_links(
-                $container->Link(),
-                $action,
+                $container->Link($action),
                 '#' . $this->getAnchor()
             );
         }
@@ -55,8 +54,7 @@ trait EvoElementTrait
         if (!is_null($container) && $container->hasMethod('AbsoluteLink'))
         {
             $link = Controller::join_links(
-                $container->AbsoluteLink(),
-                $action,
+                $container->AbsoluteLink($action),
                 '#' . $this->getAnchor()
             );
         }
@@ -348,6 +346,16 @@ trait EvoElementTrait
     public function inlineEditable(): bool
     {
         return $this->isInlineEditable();
+    }
+
+    public function beforeUpdateInlineCMSFields(callable $callback): void
+    {
+        $this->beforeExtending('updateInlineCMSFields', $callback);
+    }
+
+    public function afterUpdateInlineCMSFields(callable $callback): void
+    {
+        $this->afterExtending('updateInlineCMSFields', $callback);
     }
 
 
