@@ -41,6 +41,8 @@ use Fromholdio\Elemental\Base\Model\EvoElementalArea;
  */
 class BaseElementExtension extends Extension
 {
+    protected ?BaseElement $providerElement = null;
+
     private static $controller_class = EvoElementController::class;
 
     private static $is_title_enabled = false;
@@ -681,6 +683,17 @@ class BaseElementExtension extends Extension
     public function getProviderElement(): ?BaseElement
     {
         return $this->getOwner()->getCachedProviderElement();
+    }
+
+    public function setCachedProviderElement(?BaseElement $element): BaseElement
+    {
+        $this->providerElement = $element;
+        return $this->getOwner();
+    }
+
+    public function getCachedProviderElement(): ?BaseElement
+    {
+        return $this->providerElement;
     }
 
     public function provideElements(): ?SS_List
