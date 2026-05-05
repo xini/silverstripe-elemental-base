@@ -191,7 +191,7 @@ class EvoElementalArea extends ElementalArea
         }
 
         /** @var DataObject&ElementalAreasContainer $container */
-        $container = $containerClass::get_by_id($containerID);
+        $container = DataObject::get($containerClass)->setUseCache(true)->byID($containerID);
         if (is_null($container)) {
             return null;
         }
