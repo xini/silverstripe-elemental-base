@@ -56,27 +56,12 @@ class ElementalAreasContainer extends Extension
 
         $action = CustomAction::create('doPublishWithAreas', 'Publish with blocks');
         $action->setDropUp(true);
-//        $action->setShouldRefresh(true);
-//        $action->setButtonIcon(SilverStripeIcons::ICON_ROCKET);
+        $action->setShouldRefresh(true);
         $action->setConfirmation('This will publish the page including all blocks, and may take a few moments longer than normal. Continue?');
         $action->addExtraClass('btn-secondary');
         $action->setRedirectURL($this->owner->getCMSEditLink());
 
         $actions->push($action);
-
-//        $action = CustomAction::create('doPublishWithAreas', 'Publish (including all blocks)')
-//            ->setShouldRefresh(true)
-//            ->addExtraClass('btn-outline-primary')
-//            ->removeExtraClass('btn-info');
-//
-//        $MajorActions = $actions->fieldByName('MajorActions');
-//
-//        if ($MajorActions) {
-//            $MajorActions->push($action);
-//        } else {
-//            $actions->push($action);
-//            $action->setAttribute('style', 'margin-left:auto;');
-//        }
     }
 
     public function doPublishWithAreas()
